@@ -4,21 +4,27 @@ import argparse
 import json
 import re
 import time
+from http.client import HTTPException
 from urllib.error import URLError
 from urllib.request import urlopen
 
 
-def check(base_url):
-    base_url = base_url.rstrip("/")
+def wait_for_health(base_url):
     for attempt in range(30):
         try:
             with urlopen(base_url + "/healthz", timeout=2) as response:
                 assert json.load(response) == {"status": "ok"}
             break
-        except (URLError, TimeoutError):
+        # A published Docker port can reset/close connections before Uvicorn is ready.
+        except (URLError, OSError, HTTPException):
             if attempt == 29:
                 raise
             time.sleep(1)
+
+
+def check(base_url):
+    base_url = base_url.rstrip("/")
+    wait_for_health(base_url)
 
     for path in ("/setup", "/widget"):
         with urlopen(base_url + path, timeout=5) as response:

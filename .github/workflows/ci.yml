@@ -50,5 +50,6 @@ jobs:
       - name: Container diagnostics and cleanup
         if: always()
         run: |
+          docker inspect --format '{{json .State}}' spotify-smoke 2>/dev/null || true
           docker logs spotify-smoke 2>/dev/null || true
           docker rm -fv spotify-smoke 2>/dev/null || true
