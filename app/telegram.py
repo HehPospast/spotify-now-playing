@@ -4,18 +4,34 @@ import time
 
 import httpx
 
+MESSAGES = {
+    "en": {
+        "idle": "Not listening to anything right now",
+        "unknown_artist": "Unknown artist",
+        "untitled": "Untitled",
+    },
+    "ru": {
+        "idle": "Сейчас ничего не слушаю",
+        "unknown_artist": "Неизвестный исполнитель",
+        "untitled": "Без названия",
+    },
+}
+
 
 class TelegramError(Exception):
     def __init__(self, code, description="", retry=0):
         self.code, self.description, self.retry = code, description.lower(), retry
 
 
-def message_text(payload):
+def message_text(payload, language="en"):
+    messages = MESSAGES[language]
     item = payload.get("item")
     if not payload.get("is_playing") or not item:
-        return "Сейчас ничего не слушаю"
+        return messages["idle"]
     artists = ", ".join(a["name"] for a in item.get("artists", []) if a.get("name"))
-    label = html.escape(f"{artists or 'Неизвестный исполнитель'} - {item.get('name') or 'Без названия'}")
+    label = html.escape(
+        f"{artists or messages['unknown_artist']} - {item.get('name') or messages['untitled']}"
+    )
     # Construct the URL from the track ID, rather than interpolating arbitrary upstream HTML.
     url = html.escape(f"https://open.spotify.com/track/{item['id']}", quote=True)
     return f'<a href="{url}">{label}</a>'
@@ -47,7 +63,7 @@ class Telegram:
     async def publish(self, payload):
         if not self.settings.telegram_token or not payload.get("success") or time.monotonic() < self.retry_at:
             return
-        text = message_text(payload)
+        text = message_text(payload, self.settings.telegram_language)
         digest = hashlib.sha256(text.encode()).hexdigest()
         state = self.store.get(self.key, {})
         if state.get("digest") == digest:

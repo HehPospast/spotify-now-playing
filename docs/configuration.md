@@ -16,6 +16,7 @@ Settings are read from environment variables. Docker Compose loads them from the
 | `POLL_INTERVAL_SECONDS` | Spotify polling interval in seconds, from 5 to 300 | `10` |
 | `TELEGRAM_BOT_TOKEN` | Telegram bot token | Empty |
 | `TELEGRAM_CHAT_ID` | Telegram channel or chat destination | Empty |
+| `TELEGRAM_LANGUAGE` | Telegram message language: `en` or `ru`; does not affect the widget | `en` |
 | `SPICY_LYRICS_SECRET_KEY` | Server-side Spicy Lyrics application key | Empty |
 
 The configuration helper creates the owner password and encryption key. It refuses to overwrite an existing `.env`. You can change `ADMIN_KEY` independently; changing the encryption key does not re-encrypt existing data.
@@ -49,7 +50,10 @@ Disconnecting in `/setup` deletes local Spotify tokens and clears the current wi
 ```dotenv
 TELEGRAM_BOT_TOKEN=your-bot-token
 TELEGRAM_CHAT_ID=@your_channel
+TELEGRAM_LANGUAGE=en
 ```
+
+Set `TELEGRAM_LANGUAGE=ru` for Russian or `TELEGRAM_LANGUAGE=en` for English (the default when omitted). This selects the idle/paused message and fallback artist/title labels in Telegram only. Track names and artist names from Spotify are preserved. Unsupported or empty language values cause a startup configuration error. After editing `.env`, run `docker compose up -d --force-recreate`. A language change updates the existing Telegram message when its text changes, keeping the same message ID.
 
 Public channels accept an `@username`. Private channels use a numeric chat ID with the `-100` prefix; direct chats use their numeric chat ID. Telegram's [getUpdates](https://core.telegram.org/bots/api#getupdates) method can identify the destination after a message or channel post. It is unavailable while a webhook is set. Inspect responses locally and keep the bot token private.
 

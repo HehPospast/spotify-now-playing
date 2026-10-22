@@ -22,6 +22,9 @@ class Settings:
     poll_seconds: float = field(default_factory=lambda: float(os.getenv("POLL_INTERVAL_SECONDS", "10")))
     telegram_token: str = field(default_factory=lambda: os.getenv("TELEGRAM_BOT_TOKEN", "").strip())
     telegram_chat: str = field(default_factory=lambda: os.getenv("TELEGRAM_CHAT_ID", "").strip())
+    telegram_language: str = field(
+        default_factory=lambda: os.getenv("TELEGRAM_LANGUAGE", "en").strip().lower()
+    )
     lyrics_key: str = field(default_factory=lambda: os.getenv("SPICY_LYRICS_SECRET_KEY", "").strip())
 
     @property
@@ -48,3 +51,5 @@ class Settings:
             raise ValueError("POLL_INTERVAL_SECONDS must be between 5 and 300")
         if bool(self.telegram_token) != bool(self.telegram_chat):
             raise ValueError("Set both TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID, or neither")
+        if self.telegram_language not in {"en", "ru"}:
+            raise ValueError("TELEGRAM_LANGUAGE must be en or ru")

@@ -58,7 +58,7 @@ docker compose up --build -d
 
 Open [the setup page](http://127.0.0.1:8080/setup), enter the `ADMIN_KEY` from `.env`, and click **Connect with Spotify**. Your player is then available at [127.0.0.1:8080/widget](http://127.0.0.1:8080/widget).
 
-For a public installation, follow the [deployment guide](docs/deployment.md) to configure HTTPS and your domain's callback URL.
+For a public installation, follow the [deployment guide](docs/deployment.md) for HTTPS, your domain's callback URL, ready-to-adapt [Caddy](docs/examples/Caddyfile) / [nginx](docs/examples/nginx.conf) configurations and deployment checks.
 
 ## Enable lyrics or Telegram
 
@@ -73,7 +73,7 @@ After editing `.env`, apply the changes:
 docker compose up -d --force-recreate
 ```
 
-Telegram posts an `Artist - Track` link and edits that same message for subsequent tracks. Paused or inactive playback displays `Сейчас ничего не слушаю`. The message ID survives restarts.
+Telegram posts an `Artist - Track` link and edits that same message for subsequent tracks. Paused or inactive playback displays `Not listening to anything right now`. Set `TELEGRAM_LANGUAGE=ru` in `.env` for Russian; the default is `en`. This setting affects Telegram only. The message ID survives restarts.
 
 Lyrics are provided by [Spicy Lyrics](https://developers.spicylyrics.org/), with source and contributor credits shown in the widget.
 

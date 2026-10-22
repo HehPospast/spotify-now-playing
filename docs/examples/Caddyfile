@@ -1,0 +1,10 @@
+# Caddy runs on the same host as the supplied Docker Compose application.
+# Replace music.example.com with your public domain. Keep ports 80/443 reachable.
+music.example.com {
+    # Caddy obtains/renews the certificate and redirects HTTP to HTTPS.
+    # Access logging is intentionally not enabled (OAuth callback query strings).
+    reverse_proxy 127.0.0.1:8080 {
+        # Deliver SSE events immediately.
+        flush_interval -1
+    }
+}

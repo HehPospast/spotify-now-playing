@@ -32,3 +32,23 @@ jobs:
       - run: npm run build
         working-directory: frontend
       - run: docker build -t spotify-now-playing:check .
+      - name: Smoke test the built container
+        shell: bash
+        run: |
+          export SPOTIFY_CLIENT_ID=ci-smoke-test
+          export ADMIN_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(48))')
+          export TOKEN_ENCRYPTION_KEY=$(python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')
+          docker run -d --name spotify-smoke \
+            -p 127.0.0.1:8080:8080 \
+            --env SPOTIFY_CLIENT_ID --env ADMIN_KEY --env TOKEN_ENCRYPTION_KEY \
+            --env SPOTIFY_REDIRECT_URI=https://music.example.com/auth/callback \
+            --read-only --tmpfs /tmp --cap-drop ALL \
+            --security-opt no-new-privileges:true \
+            --mount type=volume,destination=/data \
+            spotify-now-playing:check
+          python scripts/check_deployment.py http://127.0.0.1:8080
+      - name: Container diagnostics and cleanup
+        if: always()
+        run: |
+          docker logs spotify-smoke 2>/dev/null || true
+          docker rm -fv spotify-smoke 2>/dev/null || true

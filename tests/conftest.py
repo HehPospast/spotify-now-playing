@@ -15,6 +15,7 @@ def settings(tmp_path):
         database=str(tmp_path / "state.sqlite3"),
         telegram_token="",
         telegram_chat="",
+        telegram_language="en",
         lyrics_key="",
     )
 
